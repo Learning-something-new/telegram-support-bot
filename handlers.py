@@ -52,9 +52,10 @@ def forward_to_user(update, context):
         'from': {'id': 49820636, 'first_name': 'Daniil', 'is_bot': False, 'last_name': 'Okhlopkov', 'username': 'danokhlopkov', 'language_code': 'en'}
     }"""
     user_id = None
+    is_reply_to_this_message = REPLY_TO_THIS_MESSAGE in update.message.reply_to_message.text
     if update.message.reply_to_message.forward_from:
         user_id = update.message.reply_to_message.forward_from.id
-    elif REPLY_TO_THIS_MESSAGE in update.message.reply_to_message.text:
+    elif is_reply_to_this_message:
         try:
             user_id = int(update.message.reply_to_message.text.split('\n')[0])
         except ValueError:
@@ -66,10 +67,11 @@ def forward_to_user(update, context):
             from_chat_id=update.message.chat_id
         )
     else:
-        context.bot.send_message(
-            chat_id=TELEGRAM_SUPPORT_CHAT_ID,
-            text=WRONG_REPLY
-        )
+        if not is_reply_to_this_message:
+            context.bot.send_message(
+                chat_id=TELEGRAM_SUPPORT_CHAT_ID,
+                text=WRONG_REPLY
+            )
 
 
 def setup_dispatcher(dp):
